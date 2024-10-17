@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Current Location, Point Selection, Distance, and Area Calculation</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        #savedData {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Select Points and Get Distance Between Them or Draw a Polygon to Calculate Area</h3>
+    <div id="map"></div>
+    <button id="saveData">Save Data</button>
+    <select id="loadDataSelect">
+        <option value="">Select saved data to load</option>
+    </select>
+    <button id="loadData">Load Data</button>
+    <button id="deleteData">Delete Data</button>
+    <p>Distance: <span id="distance">0</span> meters</p>
+    <p>Area: <span id="area">0</span> square meters</p>
+
+    <div id="savedData">
+        <h4>Saved Data:</h4>
+        <p><strong>Markers:</strong> <span id="savedMarkers">None</span></p>
+        <p><strong>Polygon:</strong> <span id="savedPolygon">None</span></p>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Draw JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <!-- Turf.js for distance and area calculation -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
+
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markers = [];
+        var polyline = null;
+        var polygonLayer = null;
+
+        // Load any existing saved data on page load
+        window.onload = function() {
+            var savedData = JSON.parse(localStorage.getItem('savedData')) || [];
+            updateLoadDataSelect(savedData); // Populate select options
+            
+            if (savedData.length > 0) {
+                // Load the first saved entry by default if there is any
+                var firstEntry = savedData[0];
+                loadSavedData(firstEntry);
+            }
+        };
+
+        map.locate({ setView: true, maxZoom: 16 });
+
+        map.on('locationfound', function(e) {
+            L.marker(e.latlng).addTo(map)
+                .bindPopup("You are here!").openPopup();
+        });
+
+        map.on('locationerror', function() {
+            alert("Unable to retrieve your location");
+        });
+
+        var drawControl = new L.Control.Draw({
+            draw: {
+                polygon: true,
+                marker: true,
+                polyline: false,
+                circle: false,
+                rectangle: false
+            }
+        });
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function(event) {
+            var layer = event.layer;
+
+            if (event.layerType === 'marker') {
+                map.addLayer(layer);
+                markers.push(layer.getLatLng());
+                if (markers.length > 1) {
+                    drawDottedLine();
+                    calculateDistance();
+                }
+            }
+
+            if (event.layerType === 'polygon') {
+                if (polygonLayer) {
+                    map.removeLayer(polygonLayer);
+                }
+                polygonLayer = layer;
+                map.addLayer(layer);
+                calculateArea(layer);
+            }
+        });
+
+        function drawDottedLine() {
+            if (polyline) {
+                map.removeLayer(polyline);
+            }
+            polyline = L.polyline(markers, {
+                color: 'blue',
+                weight: 2,
+                dashArray: '5, 10',
+            }).addTo(map);
+        }
+
+        function calculateDistance() {
+            var totalDistance = 0;
+            for (let i = 0; i < markers.length - 1; i++) {
+                totalDistance += markers[i].distanceTo(markers[i + 1]);
+            }
+            document.getElementById('distance').innerHTML = totalDistance.toFixed(2);
+        }
+
+        function calculateArea(layer) {
+            var latlngs = layer.getLatLngs()[0];
+            var coordinates = latlngs.map(function(latlng) {
+                return [latlng.lng, latlng.lat];
+            });
+            coordinates.push(coordinates[0]);
+            var polygon = turf.polygon([coordinates]);
+            var area = turf.area(polygon);
+            document.getElementById('area').innerHTML = area.toFixed(2);
+        }
+
+        // Save markers and polygon data to localStorage
+        document.getElementById('saveData').onclick = function() {
+            var markerData = markers.map(marker => [marker.lng, marker.lat]);
+            var polygonData = polygonLayer ? polygonLayer.getLatLngs()[0].map(latlng => [latlng.lng, latlng.lat]) : null;
+
+            // Get existing saved data from localStorage or initialize if empty
+            var savedData = JSON.parse(localStorage.getItem('savedData')) || [];
+            var entry = {
+                markers: markerData,
+                polygon: polygonData,
+                timestamp: new Date().toLocaleString() // Store timestamp for easy reference
+            };
+            savedData.push(entry);
+            localStorage.setItem('savedData', JSON.stringify(savedData));
+
+            updateLoadDataSelect(savedData); // Update select options
+            updateSavedDataDisplay(markerData, polygonData); // Update display
+            alert("Data saved!");
+        };
+
+        // Load selected saved data from localStorage
+        document.getElementById('loadData').onclick = function() {
+            var savedData = JSON.parse(localStorage.getItem('savedData')) || [];
+            var selectedIndex = document.getElementById('loadDataSelect').value;
+
+            if (selectedIndex !== "") {
+                var entry = savedData[selectedIndex];
+                loadSavedData(entry);
+            } else {
+                alert("Please select saved data to load.");
+            }
+        };
+
+        // Delete selected saved data from localStorage
+        document.getElementById('deleteData').onclick = function() {
+            var savedData = JSON.parse(localStorage.getItem('savedData')) || [];
+            var selectedIndex = document.getElementById('loadDataSelect').value;
+
+            if (selectedIndex !== "") {
+                savedData.splice(selectedIndex, 1); // Remove the selected entry
+                localStorage.setItem('savedData', JSON.stringify(savedData));
+                updateLoadDataSelect(savedData); // Update select options
+                alert("Data deleted!");
+
+                // Clear the displayed data
+                markers = [];
+                polyline = null;
+                if (polygonLayer) {
+                    map.removeLayer(polygonLayer);
+                    polygonLayer = null;
+                }
+                updateSavedDataDisplay([], null); // Clear displayed saved data
+            } else {
+                alert("Please select saved data to delete.");
+            }
+        };
+
+        function loadSavedData(entry) {
+            // Clear existing markers and polygon from the map
+            markers = [];
+            if (polyline) {
+                map.removeLayer(polyline);
+            }
+            if (polygonLayer) {
+                map.removeLayer(polygonLayer);
+            }
+
+            // Load markers
+            entry.markers.forEach(coords => {
+                var latlng = L.latLng(coords[1], coords[0]);
+                markers.push(latlng);
+                L.marker(latlng).addTo(map);
+            });
+
+            if (markers.length > 1) {
+                drawDottedLine();
+                calculateDistance();
+            }
+
+            // Load polygon
+            if (entry.polygon) {
+                var latlngs = entry.polygon.map(coords => L.latLng(coords[1], coords[0]));
+                polygonLayer = L.polygon(latlngs).addTo(map);
+                calculateArea(polygonLayer);
+            }
+
+            updateSavedDataDisplay(entry.markers, entry.polygon); // Update display
+            alert("Data loaded!");
+        }
+
+        // Function to update the load data select options
+        function updateLoadDataSelect(savedData) {
+            var select = document.getElementById('loadDataSelect');
+            select.innerHTML = '<option value="">Select saved data to load</option>'; // Reset options
+            savedData.forEach((data, index) => {
+                select.innerHTML += `<option value="${index}">Entry ${index + 1} - ${data.timestamp}</option>`;
+            });
+        }
+
+        // Function to update the saved data display
+        function updateSavedDataDisplay(markerData, polygonData) {
+            const savedMarkersText = markerData.length ? JSON.stringify(markerData) : 'None';
+            const savedPolygonText = polygonData ? JSON.stringify(polygonData) : 'None';
+            document.getElementById('savedMarkers').innerText = savedMarkersText;
+            document.getElementById('savedPolygon').innerText = savedPolygonText;
+        }
+    </script>
+</body>
+</html>
