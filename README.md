@@ -42,4 +42,12 @@ This project is an interactive web application that allows users to interact wit
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/leaflet-map-project.git
+   git clone https://github.com/Prakashkakarlla/map
+
+
+2. Clone the repository and navigate to the project directory:
+   ```bash
+   cd map
+
+3. Open index.html in your preferred web browser to view the project.
+
