@@ -59,3 +59,24 @@ This project is an interactive web application that allows users to interact wit
 - **`assets/`**
 
 ---
+
+## Usage
+
+### Start the Map
+- Open the web application in your browser.
+- The map will automatically center on your current location (if location permissions are granted).
+
+### Add Markers
+- Use the marker tool from the map controls to place markers on the map.
+- The application calculates the distance between the markers in real time.
+
+### Draw Polygons
+- Use the polygon tool to draw shapes on the map.
+- The application calculates and displays the area of the polygon in real time.
+
+### Save and Load Data
+- Save the current markers and polygon data using the **Save Data** button.
+- Reload previously saved data using the dropdown menu and **Load Data** button.
+
+### Delete Data
+- Remove saved data using the **Delete Data** button.
