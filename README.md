@@ -27,7 +27,7 @@ This project is an interactive web application that allows users to interact wit
 
 ## Demo
 
-![Map Screenshot](https://via.placeholder.com/800x400.png?text=Map+Preview)
+![Map Screenshot](https://github.com/Prakashkakarlla/map/blob/main/Assets/Distance%20map.png)
 
 ## Technologies Used
 
