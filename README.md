@@ -51,3 +51,11 @@ This project is an interactive web application that allows users to interact wit
 
 3. Open index.html in your preferred web browser to view the project.
 
+## Project Structure
+### File Details
+
+- **`index.html`**: The main HTML file containing the structure and functionality of the map application.
+- **`README.md`**: The project documentation file, providing an overview and usage instructions.
+- **`assets/`**
+
+---
