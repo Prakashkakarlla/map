@@ -29,6 +29,11 @@ This project is an interactive web application that allows users to interact wit
 
 ![Map Screenshot](https://github.com/Prakashkakarlla/map/blob/main/Assets/Distance%20map.png)
 
+## Live Demo
+
+Access the live project [here](https://map-beta-ten.vercel.app/).
+
+
 ## Technologies Used
 
 - **Frontend:**
