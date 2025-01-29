@@ -3,47 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaflet Map with Current Location, Point Selection, Distance, and Area Calculation</title>
-    <!-- Leaflet CSS -->
+    <title>Geo Calculator - Distance & Area Measurement</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <!-- Leaflet Draw CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h3 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
         #map {
             height: 500px;
             width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-        #savedData {
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        #loadDataSelect {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            min-width: 250px;
+        }
+
+        .data-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
             margin-top: 20px;
+        }
+
+        .data-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .data-card h4 {
+            margin-top: 0;
+            color: #666;
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 10px;
+        }
+
+        .metric {
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        #deleteData {
+            background-color: #f44336;
+        }
+
+        #loadData {
+            background-color: var(--secondary-color);
         }
     </style>
 </head>
 <body>
-    <h3>Select Points and Get Distance Between Them or Draw a Polygon to Calculate Area</h3>
-    <div id="map"></div>
-    <button id="saveData">Save Data</button>
-    <select id="loadDataSelect">
-        <option value="">Select saved data to load</option>
-    </select>
-    <button id="loadData">Load Data</button>
-    <button id="deleteData">Delete Data</button>
-    <p>Distance: <span id="distance">0</span> meters</p>
-    <p>Area: <span id="area">0</span> square meters</p>
+    <div class="container">
+        <h3>📏 Geo Calculator - Measure Distance & Area</h3>
+        
+        <div id="map"></div>
 
-    <div id="savedData">
-        <h4>Saved Data:</h4>
-        <p><strong>Markers:</strong> <span id="savedMarkers">None</span></p>
-        <p><strong>Polygon:</strong> <span id="savedPolygon">None</span></p>
+        <div class="controls">
+            <button id="saveData" title="Save current measurements">💾 Save</button>
+            <select id="loadDataSelect">
+                <option value="">📂 Load saved data...</option>
+            </select>
+            <button id="loadData">📤 Load</button>
+            <button id="deleteData">🗑 Delete</button>
+        </div>
+
+        <div class="data-display">
+            <div class="data-card">
+                <h4>Current Measurements</h4>
+                <p>Distance: <span class="metric" id="distance">0</span> meters</p>
+                <p>Area: <span class="metric" id="area">0</span> m²</p>
+            </div>
+
+            <div class="data-card">
+                <h4>Saved Data</h4>
+                <p><strong>Markers:</strong><br>
+                <span id="savedMarkers">None</span></p>
+                <p><strong>Polygon:</strong><br>
+                <span id="savedPolygon">None</span></p>
+            </div>
+        </div>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- Scripts remain unchanged -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <!-- Leaflet Draw JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <!-- Turf.js for distance and area calculation -->
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf/turf.min.js"></script>
-
     <script>
+        // Original JavaScript code remains unchanged
+        // ... [All the original JavaScript code here] ...
         var map = L.map('map').setView([51.505, -0.09], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
@@ -245,6 +345,7 @@
             document.getElementById('savedMarkers').innerText = savedMarkersText;
             document.getElementById('savedPolygon').innerText = savedPolygonText;
         }
+   
     </script>
 </body>
 </html>
